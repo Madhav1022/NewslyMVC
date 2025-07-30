@@ -9,12 +9,20 @@ class BrowserView extends StatefulWidget {
 }
 
 class _BrowserViewState extends State<BrowserView> {
-  late String url;
+  late final WebViewController _controller;
+  late final String url;
+  bool _isControllerInit = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    url = ModalRoute.of(context)!.settings.arguments as String;
+    if (!_isControllerInit) {
+      url = ModalRoute.of(context)!.settings.arguments as String;
+      _controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..loadRequest(Uri.parse(url));
+      _isControllerInit = true;
+    }
   }
 
   @override
@@ -28,14 +36,12 @@ class _BrowserViewState extends State<BrowserView> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => setState(() {}),
+            onPressed: () => _controller.reload(),
           )
         ],
       ),
-      body: WebView(
-        initialUrl: url,
-        javascriptMode: JavascriptMode.unrestricted,
-      ),
+      body: WebViewWidget(controller: _controller),
     );
   }
 }
+
